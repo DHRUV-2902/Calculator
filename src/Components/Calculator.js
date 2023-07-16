@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 
 const Calculator = () => {
   const [result, setResult] = useState(0);
+  const [error, setError] = useState('');
 
   const handleClick = (e) => {
     setResult((prevResult) => {
@@ -12,16 +13,29 @@ const Calculator = () => {
       if (input === '=') {
         try {
           newResult = eval(prevResult);
+
+          // Handle division by zero
+          if (!isFinite(newResult)) {
+            throw new Error('Cannot divide by zero');
+          }
+
+          setError('');
         } catch (error) {
-          newResult = 'Error';
-          
+          newResult = '';
+          setError('Error: ' + error.message);
         }
       } else if (input === 'C') {
         newResult = '';
+        setError('');
       } else {
         // Only allow valid input (numbers and operators)
         if (/^[0-9+\-*/.]+$/.test(input)) {
           newResult += input;
+          setError('');
+        } else {
+          // Handle invalid input
+          newResult = '';
+          setError('Error: Invalid input');
         }
       }
 
@@ -36,7 +50,7 @@ const Calculator = () => {
         <input
           className="w-full mb-4 p-2 rounded text-black"
           type="text"
-          value={result}
+          value={error ? error : result}
           readOnly
         />
 
